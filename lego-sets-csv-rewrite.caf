@@ -1,0 +1,26 @@
+import &ArtStandardLib, {} &csv
+{finished} = require "stream/promises"
+
+# first argument from the command-line
+file = :sets.csv
+
+firstRecord = true
+transform = ([first, rest...]) ->
+  if firstRecord
+    firstRecord=false
+    [] first, :variant, rest...
+  else
+    if match = first.match /[0-9]+/g
+      [number, otherNumbers...] = match
+      [] number, otherNumbers?.join("-") || '', rest...
+    else
+      # log.error noMatch: {} first, rest
+      [] first, '', rest...
+
+
+&fs
+.createReadStream file
+.pipe csv.parse {}
+.pipe csv.transform transform
+.pipe csv.stringify {}
+.pipe process.stdout
