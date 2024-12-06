@@ -10,17 +10,20 @@ transform = ([first, rest...]) ->
     firstRecord=false
     [] first, :variant, rest...
   else
-    if match = first.match /[0-9]+/g
-      [number, otherNumbers...] = match
-      [] number, otherNumbers?.join("-") || '', rest...
+    fifthColumn = rest[3]
+    if /^[1-9]\d*$/.test(fifthColumn)
+      if match = first.match /[0-9]+/g
+        [number, otherNumbers...] = match
+        [] number, otherNumbers?.join("-") || '', rest...
+      else
+        [] first, '', rest...
     else
-      # log.error noMatch: {} first, rest
-      [] first, '', rest...
+      null
 
 
 &fs
 .createReadStream file
 .pipe csv.parse {}
 .pipe csv.transform transform
-.pipe csv.stringify {}
+.pipe csv.stringify delimiter: "\t"
 .pipe process.stdout
